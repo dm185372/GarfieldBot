@@ -1,0 +1,56 @@
+name: Deploy
+
+# Run workflow each time a PR is run, or manually
+on:
+  workflow_dispatch:
+
+  push:
+    branches:
+      - 'main'
+    paths:
+      - "garfieldbot/**"
+
+jobs:
+
+  deploy:
+    name: Deploy new Python to s3 for Lambda to pick up
+
+    runs-on: ubuntu-20.04
+
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          ref: main
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Deploy code to s3
+        run: |
+          cd garfieldbot
+          pip3 install --target ./package -r requirements.txt
+          cd package
+          zip -r ../garfieldbot.zip .
+          cd ..
+          zip -g garfieldbot.zip garfieldbot.py
+          aws s3 cp garfieldbot.zip s3://discord-garfield-code/
+        shell: bash
+
+      - name: Clean up workspace
+        run: |
+          echo "Cleaning up job"
+          echo "Workspace before:"
+          echo "---------------------------------------"
+          ls -lah "${{ github.workspace }}"
+          sudo rm -rf "${{ github.workspace }}"/*
+          echo ""
+          echo "Workspace after:"
+          echo "---------------------------------------"          
+          ls -lah "${{ github.workspace }}"
+        if: always()

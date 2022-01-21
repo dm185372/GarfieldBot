@@ -1,9 +1,9 @@
 # bot.py
 import os
+import boto3
 import discord
 import requests
 import logging
-import json
 import random
 from datetime import date
 import calendar
@@ -11,9 +11,17 @@ import calendar
 #Logging configuration
 logging.basicConfig(format='%(levelname)s %(asctime)s - %(message)s', level=logging.INFO)
 
-TOKEN = os.getenv('DISCORD_TOKEN')
-TENOR_TOKEN = os.getenv('TENOR_TOKEN')
-GUILD = 'What Are The Odds?!'
+ssm = boto3.client('ssm')
+
+#TOKEN = os.getenv('DISCORD_TOKEN')
+#TENOR_TOKEN = os.getenv('TENOR_TOKEN')
+
+discord_token_param = ssm.get_parameter(Name='discord.token', WithDecryption=True)
+TOKEN = discord_token_param["Parameter"]["Value"]
+
+tenor_token_param = ssm.get_parameter(Name='tenor.token', WithDecryption=True)
+TENOR_TOKEN = tenor_token_param["Parameter"]["Value"]
+
 #channel_id = 402916062452252675
 channel_id = 848560114172690442
 
@@ -47,5 +55,7 @@ async def on_ready():
 
     await client.close()
 
-client.run(TOKEN)
 #tenorgif()
+
+def lambda_handler(event, context):
+    client.run(TOKEN)
