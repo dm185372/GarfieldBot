@@ -20,7 +20,7 @@ jobs:
   lint:
     name: Lint Python code
 
-    runs-on: self-hosted
+    runs-on: ubuntu-20.04
 
     steps:
 
