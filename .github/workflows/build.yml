@@ -1,0 +1,51 @@
+name: Build
+
+# Run workflow each time a PR is run, or manually
+on:
+  workflow_dispatch:
+
+  pull_request:
+    branches:
+      - 'main'
+    types: [ opened, reopened, synchronize ]
+    paths:
+      - "garfieldbot/**"
+
+jobs:
+
+  lint:
+    name: Lint Python code
+
+    runs-on: ubuntu-20.04
+
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.head_ref }}
+
+      # Lints python to avoid human eror
+      - name: Run Super-Linter
+        uses: github/super-linter/slim@v4
+        env:
+          DEFAULT_BRANCH: main
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VALIDATE_ALL_CODEBASE: true
+          VALIDATE_PYTHON: true
+          MULTI_STATUS: false
+          FILTER_REGEX_INCLUDE: "garfieldbot/*"
+        continue-on-error: true
+
+      - name: Clean up workspace
+        run: |
+          echo "Cleaning up job"
+          echo "Workspace before:"
+          echo "---------------------------------------"
+          ls -lah "${{ github.workspace }}"
+          sudo rm -rf "${{ github.workspace }}"/*
+          echo ""
+          echo "Workspace after:"
+          echo "---------------------------------------"          
+          ls -lah "${{ github.workspace }}"
+        if: always()

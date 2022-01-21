@@ -17,3 +17,4 @@ package/
 envsecrets-0.*
 *packer-manifest.json
 venv/
+*.zip

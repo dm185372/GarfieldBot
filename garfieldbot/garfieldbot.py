@@ -1,27 +1,41 @@
 # bot.py
 import os
+import boto3
 import discord
 import requests
 import logging
-import json
 import random
+from datetime import date
+import calendar
 
 #Logging configuration
 logging.basicConfig(format='%(levelname)s %(asctime)s - %(message)s', level=logging.INFO)
 
-TOKEN = os.getenv('DISCORD_TOKEN')
-TENOR_TOKEN = os.getenv('TENOR_TOKEN')
-GUILD = 'What Are The Odds?!'
-channel_id = 402916062452252675
+ssm = boto3.client('ssm')
+
+#TOKEN = os.getenv('DISCORD_TOKEN')
+#TENOR_TOKEN = os.getenv('TENOR_TOKEN')
+
+discord_token_param = ssm.get_parameter(Name='discord.token', WithDecryption=True)
+TOKEN = discord_token_param["Parameter"]["Value"]
+
+tenor_token_param = ssm.get_parameter(Name='tenor.token', WithDecryption=True)
+TENOR_TOKEN = tenor_token_param["Parameter"]["Value"]
+
+#channel_id = 402916062452252675
+channel_id = 848560114172690442
 
 intents = discord.Intents.default()
 intents.members = True
 client = discord.Client(intents=intents)
 
+my_date = date.today()
+day_name = calendar.day_name[my_date.weekday()] #i.e. Friday
+
 def tenorgif():
-    search_term = "garfield"
-    lmt = 20
-    random_number = random.randint(0, 20)
+    search_term = "garfield {}".format(day_name)
+    lmt = 50
+    random_number = random.randint(0, lmt)
 
     r = requests.get('https://g.tenor.com/v1/search?q={}&key={}&media_filter=gif&content_filter=medium&limit={}'.format(search_term, TENOR_TOKEN, lmt))
     #logging.info('response code: %s', r.status_code)
@@ -41,5 +55,7 @@ async def on_ready():
 
     await client.close()
 
-client.run(TOKEN)
 #tenorgif()
+
+def lambda_handler(event, context):
+    client.run(TOKEN)
