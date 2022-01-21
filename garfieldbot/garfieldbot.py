@@ -22,8 +22,8 @@ TOKEN = discord_token_param["Parameter"]["Value"]
 tenor_token_param = ssm.get_parameter(Name='tenor.token', WithDecryption=True)
 TENOR_TOKEN = tenor_token_param["Parameter"]["Value"]
 
-#channel_id = 402916062452252675
-channel_id = 848560114172690442
+channel_id = 402916062452252675 #this is the emotional channel
+#channel_id = 848560114172690442 #this is the bot-testing channel
 
 intents = discord.Intents.default()
 intents.members = True
