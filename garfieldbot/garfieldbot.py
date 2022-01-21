@@ -5,6 +5,8 @@ import requests
 import logging
 import json
 import random
+from datetime import date
+import calendar
 
 #Logging configuration
 logging.basicConfig(format='%(levelname)s %(asctime)s - %(message)s', level=logging.INFO)
@@ -12,16 +14,20 @@ logging.basicConfig(format='%(levelname)s %(asctime)s - %(message)s', level=logg
 TOKEN = os.getenv('DISCORD_TOKEN')
 TENOR_TOKEN = os.getenv('TENOR_TOKEN')
 GUILD = 'What Are The Odds?!'
-channel_id = 402916062452252675
+#channel_id = 402916062452252675
+channel_id = 848560114172690442
 
 intents = discord.Intents.default()
 intents.members = True
 client = discord.Client(intents=intents)
 
+my_date = date.today()
+day_name = calendar.day_name[my_date.weekday()] #i.e. Friday
+
 def tenorgif():
-    search_term = "garfield"
-    lmt = 20
-    random_number = random.randint(0, 20)
+    search_term = "garfield {}".format(day_name)
+    lmt = 50
+    random_number = random.randint(0, lmt)
 
     r = requests.get('https://g.tenor.com/v1/search?q={}&key={}&media_filter=gif&content_filter=medium&limit={}'.format(search_term, TENOR_TOKEN, lmt))
     #logging.info('response code: %s', r.status_code)
