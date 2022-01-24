@@ -46,7 +46,7 @@ jobs:
         run: |
           aws lambda update-function-code \
           --function-name  GarfieldBot \
-          --s3-bucket discord-garfield-code
+          --s3-bucket discord-garfield-code \
           --s3-key garfieldbot.zip
 
       - name: Clean up workspace
