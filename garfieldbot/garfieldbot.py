@@ -15,6 +15,7 @@ ssm = boto3.client('ssm')
 
 #TOKEN = os.getenv('DISCORD_TOKEN')
 #TENOR_TOKEN = os.getenv('TENOR_TOKEN')
+GUILD = 'What Are The Odds?!'
 
 discord_token_param = ssm.get_parameter(Name='discord.token', WithDecryption=True)
 TOKEN = discord_token_param["Parameter"]["Value"]
@@ -51,11 +52,28 @@ def tenorgif():
 async def on_ready():
     channel = client.get_channel(channel_id)
     garfield_gif = tenorgif()
+
+    for guild in client.guilds:
+        if guild.name == GUILD:
+            break
+
+    mentions = [user.mention for user in client.users]
+    greeting_list = ['Enjoy your day today.',
+                    'Take some time for yourself today.'
+                    'Don\'t work too hard',
+                    'You\'re the greatest!',
+                    'Thinking of you!',
+                    'You da best!',
+                    'Make sure to eat some lasagna today.',
+                    'You have the makings of a Go-Hard.',
+                    'Have a great day.',
+                    'Have an awesome day.',
+                    'Have a wonderful day.']
+
     await channel.send('{}'.format(garfield_gif))
+    await channel.send('Happy {} {}! {}'.format(day_name, random.choice(mentions), random.choice(greeting_list)))
 
     await client.close()
-
-#tenorgif()
 
 def lambda_handler(event, context):
     client.run(TOKEN)

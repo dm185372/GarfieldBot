@@ -45,7 +45,7 @@ jobs:
       - name: Update Lambda function to point at new code version
         run: |
           aws lambda update-function-code \
-          --function-name  GarfieldBot \
+          --function-name GarfieldBot \
           --s3-bucket discord-garfield-code \
           --s3-key garfieldbot.zip
 
