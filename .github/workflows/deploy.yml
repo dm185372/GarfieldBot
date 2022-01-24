@@ -1,5 +1,9 @@
 name: Deploy
 
+env:
+  S3_BUCKET: 'discord-garfield-code'
+  S3_KEY: 'garfieldbot.zip'
+
 # Run workflow each time a PR is run, or manually
 on:
   workflow_dispatch:
@@ -36,18 +40,18 @@ jobs:
           cd garfieldbot
           pip3 install --target ./package -r requirements.txt
           cd package
-          zip -r ../garfieldbot.zip .
+          zip -r ../${{ env.S3_KEY }} .
           cd ..
-          zip -g garfieldbot.zip garfieldbot.py
-          aws s3 cp garfieldbot.zip s3://discord-garfield-code/
+          zip -g ${{ env.S3_KEY }} garfieldbot.py
+          aws s3 cp ${{ env.S3_KEY }} s3://${{ env.S3_BUCKET }}/
         shell: bash
 
       - name: Update Lambda function to point at new code version
         run: |
           aws lambda update-function-code \
           --function-name GarfieldBot \
-          --s3-bucket discord-garfield-code \
-          --s3-key garfieldbot.zip
+          --s3-bucket ${{ env.S3_BUCKET }} \
+          --s3-key ${{ env.S3_KEY }}
 
       - name: Clean up workspace
         run: |
