@@ -76,7 +76,7 @@ async def on_ready():
                     'Enjoy!',
                     'Have a nice morning.',
                     'Hope your day is going well.',
-                    'It\'s always a pleasure pogging with you']
+                    'It\'s always a pleasure pogging with you.']
 
     await channel.send('{}'.format(garfield_gif))
     await channel.send('Happy {} {}! {}'.format(day_name, random.choice(mentions), random.choice(greeting_list)))
