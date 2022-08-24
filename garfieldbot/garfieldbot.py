@@ -59,7 +59,7 @@ async def on_ready():
 
     mentions = [user.mention for user in client.users]
     greeting_list = ['Enjoy your day today.',
-                    'Take some time for yourself today.'
+                    'Take some time for yourself today.',
                     'Don\'t work too hard',
                     'You\'re the greatest!',
                     'Thinking of you!',
