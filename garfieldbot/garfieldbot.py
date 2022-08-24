@@ -48,10 +48,23 @@ def tenorgif():
     else:
         garfield_gif = None
 
+def powerful_quote():
+    r = requests.get('https://zenquotes.io/api/today')
+    logging.info('response code: %s', r.status_code)
+
+    if r.status_code == 200:
+        our_quote = r.json()[0]['q']
+        our_author = r.json()[0]['a']
+        quote_message = '"{}"- {}'.format(our_quote, our_author)
+        return(quote_message)
+    else:
+        quote_message = None
+
 @client.event
 async def on_ready():
     channel = client.get_channel(channel_id)
     garfield_gif = tenorgif()
+    quote = powerful_quote()
 
     for guild in client.guilds:
         if guild.name == GUILD:
@@ -79,9 +92,12 @@ async def on_ready():
                     'It\'s always a pleasure pogging with you.']
 
     await channel.send('{}'.format(garfield_gif))
-    await channel.send('Happy {} {}! {}'.format(day_name, random.choice(mentions), random.choice(greeting_list)))
+    #await channel.send('Happy {} {}! {}'.format(day_name, random.choice(mentions), random.choice(greeting_list)))
+    await channel.send('Happy {} {}! Here\'s today\'s inspirational quote: \n{}'.format(day_name, random.choice(mentions), quote))
 
     await client.close()
 
 def lambda_handler(event, context):
     client.run(TOKEN)
+
+client.run(TOKEN)
