@@ -93,7 +93,7 @@ async def on_ready():
 
     await channel.send('{}'.format(garfield_gif))
     #await channel.send('Happy {} {}! {}'.format(day_name, random.choice(mentions), random.choice(greeting_list)))
-    await channel.send('Happy {} {}! Here\'s today\'s inspirational quote: \n{}'.format(day_name, random.choice(mentions), quote))
+    await channel.send('Happy {} {}! Here\'s today\'s inspirational quote: \n> {}'.format(day_name, random.choice(mentions), quote))
 
     await client.close()
 
