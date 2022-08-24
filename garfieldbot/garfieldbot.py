@@ -99,5 +99,3 @@ async def on_ready():
 
 def lambda_handler(event, context):
     client.run(TOKEN)
-
-client.run(TOKEN)
