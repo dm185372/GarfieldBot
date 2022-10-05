@@ -83,7 +83,7 @@ async def on_ready():
         if guild.name == GUILD:
             break
 
-    mentions = [user.mention for user in client.users]
+    mentions = [user.mention for user in client.users if user.bot == False]
     greeting_list = ['Enjoy your day today.',
                     'Take some time for yourself today.',
                     'Don\'t work too hard',
