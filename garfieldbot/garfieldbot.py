@@ -13,8 +13,6 @@ logging.basicConfig(format='%(levelname)s %(asctime)s - %(message)s', level=logg
 
 ssm = boto3.client('ssm')
 
-#TOKEN = os.getenv('DISCORD_TOKEN')
-#TENOR_TOKEN = os.getenv('TENOR_TOKEN')
 GUILD = 'What Are The Odds?!'
 
 discord_token_param = ssm.get_parameter(Name='discord.token', WithDecryption=True)
@@ -60,11 +58,26 @@ def powerful_quote():
     else:
         quote_message = None
 
+def our_history():
+    month = date.today().strftime("%m")
+    day = date.today().strftime("%d")
+
+    r = requests.get('https://api.wikimedia.org/feed/v1/wikipedia/en/onthisday/events/{}/{}'.format(month, day))
+    logging.info('response code: %s', r.status_code)
+
+    if r.status_code == 200:
+        event = random.choice(r.json()['events'])
+        event_text = event['text']
+        event_link = event['pages'][0]['content_urls']['desktop']['page']
+        event = "{} - {}".format(event_text, event_link)
+        return(event)
+    else:
+        event = None
+
 @client.event
 async def on_ready():
     channel = client.get_channel(channel_id)
     garfield_gif = tenorgif()
-    quote = powerful_quote()
 
     for guild in client.guilds:
         if guild.name == GUILD:
@@ -93,7 +106,11 @@ async def on_ready():
 
     await channel.send('{}'.format(garfield_gif))
     #await channel.send('Happy {} {}! {}'.format(day_name, random.choice(mentions), random.choice(greeting_list)))
-    await channel.send('Happy {} {}! Here\'s today\'s inspirational quote: \n> {}'.format(day_name, random.choice(mentions), quote))
+    todays_choice = random.choice([0, 1])
+    if todays_choice == 0:
+        await channel.send('Happy {} {}! Here\'s today\'s inspirational quote: \n> {}'.format(day_name, random.choice(mentions), powerful_quote()))
+    else:
+        await channel.send('Happy {} {}! On this day in history: \n> {}'.format(day_name, random.choice(mentions), our_history()))
 
     await client.close()
 
