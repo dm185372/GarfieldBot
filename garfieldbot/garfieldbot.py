@@ -106,6 +106,18 @@ class Garf:
         else:
             national_day = None
 
+    def riddle_me_this(self):
+        r = requests.get('https://riddles-api.vercel.app/random')
+        logging.info('response code: %s', r.status_code)
+
+        if r.status_code == 200:
+            riddle = r.json()['riddle']
+            answer = r.json()['answer']
+            riddle_string = "{}\n||{}||".format(riddle, answer)
+            return(riddle_string)
+        else:
+            riddle_string = None
+
 @client.event
 async def on_ready():
     channel = client.get_channel(channel_id)
@@ -129,9 +141,9 @@ async def on_ready():
     elif todays_choice == 1:
         await channel.send('Happy {} {}! {}'.format(day_name, random.choice(mentions), garf.greeting()))
     elif todays_choice == 2:
-        await channel.send('Happy {} {}! On this day in history: \n> {}'.format(day_name, random.choice(mentions), garf.our_history()))
-    else:
         await channel.send('Happy {} {}! Today is: \n> {}'.format(day_name, random.choice(mentions), garf.national_what_day()))
+    else:
+        await channel.send('Happy {} {}! Riddle me this: \n>>> {}'.format(day_name, random.choice(mentions), garf.riddle_me_this()))
 
     await client.close()
 
