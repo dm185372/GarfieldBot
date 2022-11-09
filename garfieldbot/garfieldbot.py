@@ -11,20 +11,17 @@ import calendar
 #Logging configuration
 logging.basicConfig(format='%(levelname)s %(asctime)s - %(message)s', level=logging.INFO)
 
-#ssm = boto3.client('ssm')
+ssm = boto3.client('ssm')
 
 GUILD = 'What Are The Odds?!'
 
-#discord_token_param = ssm.get_parameter(Name='discord.token', WithDecryption=True)
-#TOKEN = discord_token_param["Parameter"]["Value"]
-TOKEN = "OTM0MDkzNjM4NDY2Njk5MjY2.YerEfg.RzRgEPS5ofVuBqcTBEKT5y_r9s8"
+discord_token_param = ssm.get_parameter(Name='discord.token', WithDecryption=True)
+TOKEN = discord_token_param["Parameter"]["Value"]
 
-#tenor_token_param = ssm.get_parameter(Name='tenor.token', WithDecryption=True)
-#TENOR_TOKEN = tenor_token_param["Parameter"]["Value"]
-TENOR_TOKEN = "TZHZ5PZX0G7P"
+tenor_token_param = ssm.get_parameter(Name='tenor.token', WithDecryption=True)
+TENOR_TOKEN = tenor_token_param["Parameter"]["Value"]
 
-#channel_id = 402916062452252675 #this is the emotional channel
-channel_id = 848560114172690442 #this is the bot-testing channel
+channel_id = 402916062452252675 #this is the emotional channel
 
 intents = discord.Intents.default()
 intents.members = True
@@ -167,5 +164,3 @@ async def on_ready():
 
 def lambda_handler(event, context):
     client.run(TOKEN)
-
-client.run(TOKEN)
