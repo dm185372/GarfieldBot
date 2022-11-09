@@ -11,28 +11,31 @@ import calendar
 #Logging configuration
 logging.basicConfig(format='%(levelname)s %(asctime)s - %(message)s', level=logging.INFO)
 
-ssm = boto3.client('ssm')
+#ssm = boto3.client('ssm')
 
 GUILD = 'What Are The Odds?!'
 
-discord_token_param = ssm.get_parameter(Name='discord.token', WithDecryption=True)
-TOKEN = discord_token_param["Parameter"]["Value"]
+#discord_token_param = ssm.get_parameter(Name='discord.token', WithDecryption=True)
+#TOKEN = discord_token_param["Parameter"]["Value"]
+TOKEN = "OTM0MDkzNjM4NDY2Njk5MjY2.YerEfg.RzRgEPS5ofVuBqcTBEKT5y_r9s8"
 
-tenor_token_param = ssm.get_parameter(Name='tenor.token', WithDecryption=True)
-TENOR_TOKEN = tenor_token_param["Parameter"]["Value"]
+#tenor_token_param = ssm.get_parameter(Name='tenor.token', WithDecryption=True)
+#TENOR_TOKEN = tenor_token_param["Parameter"]["Value"]
+TENOR_TOKEN = "TZHZ5PZX0G7P"
 
-channel_id = 402916062452252675 #this is the emotional channel
-#channel_id = 848560114172690442 #this is the bot-testing channel
+#channel_id = 402916062452252675 #this is the emotional channel
+channel_id = 848560114172690442 #this is the bot-testing channel
 
 intents = discord.Intents.default()
 intents.members = True
 client = discord.Client(intents=intents)
 
 class Garf:
-    def __init__(self, day_of_week, day, month):
+    def __init__(self, day_of_week, day, month, mention):
         self.dw = day_of_week
         self.d = day
         self.m = month
+        self.mention = mention
 
     def tenorgif(self):
         search_term = "garfield {}".format(self.dw)
@@ -56,23 +59,11 @@ class Garf:
             our_quote = r.json()[0]['q']
             our_author = r.json()[0]['a']
             quote_message = '"{}"- {}'.format(our_quote, our_author)
-            return(quote_message)
+            message = 'Happy {} {}! Here\'s today\'s inspirational quote: \n> {}'.format(self.dw, self.mention, quote_message)
+            return(message)
         else:
-            quote_message = None
+            message = None
     
-    def our_history(self):
-        r = requests.get('https://api.wikimedia.org/feed/v1/wikipedia/en/onthisday/events/{}/{}'.format(self.m, self.d))
-        logging.info('response code: %s', r.status_code)
-
-        if r.status_code == 200:
-            event = random.choice(r.json()['events'])
-            event_text = event['text']
-            event_link = event['pages'][0]['content_urls']['desktop']['page']
-            event = "{} - {}".format(event_text, event_link)
-            return(event)
-        else:
-            event = None
-
     def greeting(self):
         greeting_list = ['Enjoy your day today.',
                         'Take some time for yourself today.',
@@ -94,7 +85,8 @@ class Garf:
                         'Hope your day is going well.',
                         'It\'s always a pleasure pogging with you.']
 
-        return(random.choice(greeting_list))
+        message = 'Happy {} {}! {}'.format(self.dw, self.mention, random.choice(greeting_list))
+        return(message)
 
     def national_what_day(self):
         r = requests.get('https://national-api-day.herokuapp.com/api/today')
@@ -102,9 +94,10 @@ class Garf:
 
         if r.status_code == 200:
             national_day = random.choice(r.json()['holidays'])
-            return(national_day)
+            message = 'Happy {} {}! Today is: \n> {}'.format(self.dw, self.mention, national_day)
+            return(message)
         else:
-            national_day = None
+            message = None
 
     def riddle_me_this(self):
         r = requests.get('https://riddles-api.vercel.app/random')
@@ -114,9 +107,41 @@ class Garf:
             riddle = r.json()['riddle']
             answer = r.json()['answer']
             riddle_string = "{}\n||{}||".format(riddle, answer)
-            return(riddle_string)
+            message = 'Happy {} {}! Riddle me this: \n>>> {}'.format(self.dw, self.mention, riddle_string)
+            return(message)
         else:
-            riddle_string = None
+            message = None
+
+    def get(self):
+        garf_done = False
+        num_list = [0, 1, 2, 3]
+        while not garf_done:
+            if not num_list:
+                logging.error('List is empty - all calls failed. Exiting out.')
+                exit(1)
+            else:
+                todays_choice = random.choice(num_list)
+
+            if todays_choice == 0:
+                logging.info('Attempting powerful quote call')
+                our_message = self.powerful_quote()
+            elif todays_choice == 1:
+                logging.info('Attempting greeting call')
+                our_message = self.greeting()
+            elif todays_choice == 2:
+                logging.info('Attempting hoiday call')
+                our_message = self.national_what_day()
+            else:
+                logging.info('Attempting riddle call')
+                our_message = self.riddle_me_this()
+
+            if our_message != None:
+                return our_message
+                garf_done == True  
+            else:
+                num_list.remove(todays_choice)
+                logging.info('That call failed - rerolling')
+                 
 
 @client.event
 async def on_ready():
@@ -126,26 +151,21 @@ async def on_ready():
     month = date.today().strftime("%m")
     day = date.today().strftime("%d")
 
-    garf = Garf(day_name, day, month)
-
     for guild in client.guilds:
         if guild.name == GUILD:
             break
 
     mentions = [user.mention for user in client.users if user.bot == False]
 
+    garf = Garf(day_name, day, month, random.choice(mentions))
+
+    todays_message = garf.get()
     await channel.send('{}'.format(garf.tenorgif()))
-    todays_choice = random.choice([0, 1, 2, 3])
-    if todays_choice == 0:
-        await channel.send('Happy {} {}! Here\'s today\'s inspirational quote: \n> {}'.format(day_name, random.choice(mentions), garf.powerful_quote()))
-    elif todays_choice == 1:
-        await channel.send('Happy {} {}! {}'.format(day_name, random.choice(mentions), garf.greeting()))
-    elif todays_choice == 2:
-        await channel.send('Happy {} {}! Today is: \n> {}'.format(day_name, random.choice(mentions), garf.national_what_day()))
-    else:
-        await channel.send('Happy {} {}! Riddle me this: \n>>> {}'.format(day_name, random.choice(mentions), garf.riddle_me_this()))
+    await channel.send(todays_message)
 
     await client.close()
 
 def lambda_handler(event, context):
     client.run(TOKEN)
+
+client.run(TOKEN)
